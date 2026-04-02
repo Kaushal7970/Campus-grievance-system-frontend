@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.2.1",

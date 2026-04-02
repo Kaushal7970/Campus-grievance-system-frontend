@@ -61,13 +61,13 @@ export default function Login() {
 
       // 🔹 Redirect based on role (hard reload ensures fresh auth state)
       const role = String(user.role || "").toUpperCase();
-      if (role === "SUPER_ADMIN") globalThis.location.href = "/#/super-admin";
-      else if (role === "ADMIN") globalThis.location.href = "/#/admin";
-      else if (role === "PRINCIPAL") globalThis.location.href = "/#/principal";
-      else if (role === "HOD") globalThis.location.href = "/#/hod";
-      else if (role === "COMMITTEE") globalThis.location.href = "/#/committee";
-      else if (role === "FACULTY") globalThis.location.href = "/#/faculty";
-      else globalThis.location.href = "/#/student";
+      if (role === "SUPER_ADMIN") window.location.assign("/#/super-admin");
+      else if (role === "ADMIN") window.location.assign("/#/admin");
+      else if (role === "PRINCIPAL") window.location.assign("/#/principal");
+      else if (role === "HOD") window.location.assign("/#/hod");
+      else if (role === "COMMITTEE") window.location.assign("/#/committee");
+      else if (role === "FACULTY") window.location.assign("/#/faculty");
+      else window.location.assign("/#/student");
 
     } catch (err) {
       console.error("Login Error:", err);
