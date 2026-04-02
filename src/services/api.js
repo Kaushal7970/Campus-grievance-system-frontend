@@ -1,3 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import axios from "axios";
 
-export default API_URL;
+const API = axios.create({
+	baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
+});
+
+export default API;
