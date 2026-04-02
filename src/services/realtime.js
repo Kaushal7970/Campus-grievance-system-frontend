@@ -6,7 +6,7 @@ let connected = false;
 let connectingPromise = null;
 
 function getWsBaseUrl() {
-  const apiBase = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+  const apiBase = (process.env.REACT_APP_API_URL || "").replace(/\/$/, "");
   return apiBase.replace(/\/api\/?$/, "");
 }
 
