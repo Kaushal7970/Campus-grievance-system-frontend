@@ -6,8 +6,7 @@ let connected = false;
 let connectingPromise = null;
 
 function getWsBaseUrl() {
-  // base REST is like http://localhost:8081/api; WS endpoint is /ws on same host
-  const apiBase = process.env.REACT_APP_API_BASE_URL || "http://localhost:8081/api";
+  const apiBase = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
   return apiBase.replace(/\/api\/?$/, "");
 }
 
