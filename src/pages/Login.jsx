@@ -1,6 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { safeSetItem } from "../services/storage";
 
 export default function Login() {
@@ -9,8 +9,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
 
   const handleLogin = async () => {
 
@@ -33,8 +31,20 @@ export default function Login() {
 
       const res = await API.post("/auth/login", payload);
 
+      // Debug: verify backend login payload contains token
+      console.log("TOKEN:", res.data);
+
+      const token = res?.data?.token;
+      if (!token) {
+        throw new Error("Token missing in login response");
+      }
+
       // 🔹 Save token
-      safeSetItem("token", res.data.token);
+      try {
+        localStorage.setItem("token", token);
+      } catch {
+        safeSetItem("token", token);
+      }
 
       // 🔹 Save user
       const user = {
@@ -43,17 +53,21 @@ export default function Login() {
         role: res.data.role
       };
 
-      safeSetItem("user", JSON.stringify(user));
+      try {
+        localStorage.setItem("user", JSON.stringify(user));
+      } catch {
+        safeSetItem("user", JSON.stringify(user));
+      }
 
-      // 🔹 Redirect based on role
+      // 🔹 Redirect based on role (hard reload ensures fresh auth state)
       const role = String(user.role || "").toUpperCase();
-      if (role === "SUPER_ADMIN") navigate("/super-admin");
-      else if (role === "ADMIN") navigate("/admin");
-      else if (role === "PRINCIPAL") navigate("/principal");
-      else if (role === "HOD") navigate("/hod");
-      else if (role === "COMMITTEE") navigate("/committee");
-      else if (role === "FACULTY") navigate("/faculty");
-      else navigate("/student");
+      if (role === "SUPER_ADMIN") globalThis.location.href = "/#/super-admin";
+      else if (role === "ADMIN") globalThis.location.href = "/#/admin";
+      else if (role === "PRINCIPAL") globalThis.location.href = "/#/principal";
+      else if (role === "HOD") globalThis.location.href = "/#/hod";
+      else if (role === "COMMITTEE") globalThis.location.href = "/#/committee";
+      else if (role === "FACULTY") globalThis.location.href = "/#/faculty";
+      else globalThis.location.href = "/#/student";
 
     } catch (err) {
       console.error("Login Error:", err);
@@ -61,7 +75,7 @@ export default function Login() {
       if (err.response) {
         alert(err.response.data.message || "Invalid credentials");
       } else {
-        alert("Server not responding");
+        alert(err.message || "Server not responding");
       }
 
     } finally {

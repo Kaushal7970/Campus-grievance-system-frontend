@@ -1,9 +1,10 @@
 import { Navigate } from "react-router-dom";
-import { getStoredUser, safeClear } from "../services/storage";
+import { getStoredUser, safeClear, safeGetItem } from "../services/storage";
 
 export default function ProtectedRoute({ children, role, roles }) {
 
   const user = getStoredUser();
+  const token = safeGetItem("token");
 
   // If user storage is unreadable/corrupt, force re-login.
   if (user === null) {
@@ -12,7 +13,8 @@ export default function ProtectedRoute({ children, role, roles }) {
   }
 
   // ❌ NOT LOGGED IN
-  if (!user) {
+  if (!user || !token) {
+    safeClear();
     return <Navigate to="/" />;
   }
 
