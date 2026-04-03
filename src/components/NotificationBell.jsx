@@ -1,15 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import API from "../services/api";
 import { subscribeTopic } from "../services/realtime";
+import { getStoredUser } from "../services/storage";
 
 export default function NotificationBell() {
-  const user = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user"));
-    } catch {
-      return null;
-    }
-  }, []);
+  const user = useMemo(() => getStoredUser(), []);
 
   const email = String(user?.email || "").trim();
 

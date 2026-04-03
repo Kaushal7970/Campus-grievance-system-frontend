@@ -1,22 +1,29 @@
 import axios from "axios";
+import { safeGetItem } from "./storage";
 
 const rootUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/$/, "");
+
+function normalizeToken(rawToken) {
+  const token = String(rawToken || "").trim();
+  if (!token) return "";
+  return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+}
+
 const API = axios.create({
-	baseURL: `${rootUrl}/api`,
+  baseURL: `${rootUrl}/api`,
 });
 
 API.interceptors.request.use((req) => {
-	const token = localStorage.getItem("token");
-	console.log("Sending Token:", token);
-	if (token) {
-		if (req.headers && typeof req.headers.set === "function") {
-			req.headers.set("Authorization", `Bearer ${token}`);
-		} else {
-			req.headers = req.headers || {};
-			req.headers.Authorization = `Bearer ${token}`;
-		}
-	}
-	return req;
+  const authHeader = normalizeToken(safeGetItem("token"));
+  if (authHeader) {
+    if (req.headers && typeof req.headers.set === "function") {
+      req.headers.set("Authorization", authHeader);
+    } else {
+      req.headers = req.headers || {};
+      req.headers.Authorization = authHeader;
+    }
+  }
+  return req;
 });
 
 export default API;

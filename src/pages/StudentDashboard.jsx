@@ -17,24 +17,50 @@ export default function StudentDashboard() {
   const fileInputRef = useRef(null);
 
   const [list, setList] = useState([]);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState(null);
 
   const user = getStoredUser();
   const userEmail = user?.email || "";
+  const encodedEmail = encodeURIComponent(userEmail);
 
   const load = useCallback(async () => {
     if (!userEmail) return;
     try {
-      setError("");
-      const res = await API.get(`/grievance/student/${userEmail}`);
-      setList(res.data || []);
+      setLoadError("");
+
+      const endpoints = [
+        `/grievance/student/${encodedEmail}`,
+        "/grievance/student/me",
+        "/grievance/student",
+        "/grievance/me"
+      ];
+
+      let lastError = null;
+      for (const endpoint of endpoints) {
+        try {
+          const res = await API.get(endpoint);
+          const items = Array.isArray(res?.data) ? res.data : res?.data?.content || [];
+          setList(Array.isArray(items) ? items : []);
+          return;
+        } catch (e) {
+          lastError = e;
+          const status = Number(e?.response?.status || 0);
+          if (![403, 404, 405].includes(status)) {
+            break;
+          }
+        }
+      }
+
+      throw lastError || new Error("Failed to load grievances");
     } catch (e) {
-      setError(e?.response?.data?.message || "Failed to load grievances");
+      setList([]);
+      setLoadError(e?.response?.data?.message || "Failed to load grievances");
     }
-  }, [userEmail]);
+  }, [encodedEmail, userEmail]);
 
   useEffect(() => {
     load();
@@ -49,7 +75,7 @@ export default function StudentDashboard() {
 
     try {
       setAiLoading(true);
-      setError("");
+      setSubmitError("");
       const res = await API.post("/ai/chat", { message: text });
       setAiSuggestion(res.data);
 
@@ -64,7 +90,7 @@ export default function StudentDashboard() {
         setPriority(suggestedPriority);
       }
     } catch (e) {
-      setError(e?.response?.data?.message || "AI suggestion failed");
+      setSubmitError(e?.response?.data?.message || "AI suggestion failed");
     } finally {
       setAiLoading(false);
     }
@@ -78,17 +104,19 @@ export default function StudentDashboard() {
 
     try {
       setSubmitting(true);
-      setError("");
+      setSubmitError("");
 
       const createRes = await API.post("/grievance/create", {
         title: title.trim(),
         description: description.trim(),
         priority: (priority || "LOW").toUpperCase(),
         category: (category || "ADMINISTRATION").toUpperCase(),
-        anonymous
+        anonymous,
+        studentEmail: userEmail || undefined
       });
 
-      const grievanceId = createRes?.data?.id;
+      const createdItem = createRes?.data?.data || createRes?.data?.grievance || createRes?.data;
+      const grievanceId = createdItem?.id || createRes?.data?.id;
       if (grievanceId && attachments.length > 0) {
         const failed = [];
         for (const file of attachments) {
@@ -104,7 +132,7 @@ export default function StudentDashboard() {
         }
 
         if (failed.length > 0) {
-          setError(`Complaint submitted, but failed to upload: ${failed.join(", ")}`);
+          setSubmitError(`Complaint submitted, but failed to upload: ${failed.join(", ")}`);
         }
       }
 
@@ -118,9 +146,17 @@ export default function StudentDashboard() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+
+      if (createdItem && typeof createdItem === "object") {
+        setList((prev) => {
+          if (prev.some((g) => g?.id === createdItem.id)) return prev;
+          return [createdItem, ...prev];
+        });
+      }
+
       await load();
     } catch (e) {
-      setError(e?.response?.data?.message || "Failed to submit grievance");
+      setSubmitError(e?.response?.data?.message || "Failed to submit grievance");
     } finally {
       setSubmitting(false);
     }
@@ -138,9 +174,15 @@ export default function StudentDashboard() {
       <div className="flex-1 p-10 bg-gray-100 dark:bg-gray-900 min-h-screen">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">🎓 Student Dashboard</h1>
 
-        {error && (
+        {loadError && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 max-w-4xl">
-            {error}
+            {loadError}
+          </div>
+        )}
+
+        {submitError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 max-w-4xl">
+            {submitError}
           </div>
         )}
 
