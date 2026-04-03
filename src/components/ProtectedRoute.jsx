@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { getStoredUser, safeClear, safeGetItem } from "../services/storage";
+import { getStoredUser, isTokenExpired, safeClear, safeGetItem } from "../services/storage";
 
 export default function ProtectedRoute({ children, role, roles }) {
 
@@ -14,6 +14,12 @@ export default function ProtectedRoute({ children, role, roles }) {
 
   // ❌ NOT LOGGED IN
   if (!user || !token) {
+    safeClear();
+    return <Navigate to="/" />;
+  }
+
+  // If token is expired, clear stale session and force sign-in.
+  if (isTokenExpired(token)) {
     safeClear();
     return <Navigate to="/" />;
   }

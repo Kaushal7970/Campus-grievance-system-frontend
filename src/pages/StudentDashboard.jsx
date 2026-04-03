@@ -32,30 +32,9 @@ export default function StudentDashboard() {
     try {
       setLoadError("");
 
-      const endpoints = [
-        `/grievance/student/${encodedEmail}`,
-        "/grievance/student/me",
-        "/grievance/student",
-        "/grievance/me"
-      ];
-
-      let lastError = null;
-      for (const endpoint of endpoints) {
-        try {
-          const res = await API.get(endpoint);
-          const items = Array.isArray(res?.data) ? res.data : res?.data?.content || [];
-          setList(Array.isArray(items) ? items : []);
-          return;
-        } catch (e) {
-          lastError = e;
-          const status = Number(e?.response?.status || 0);
-          if (![403, 404, 405].includes(status)) {
-            break;
-          }
-        }
-      }
-
-      throw lastError || new Error("Failed to load grievances");
+      const res = await API.get(`/grievance/student/${encodedEmail}`);
+      const items = Array.isArray(res?.data) ? res.data : res?.data?.content || [];
+      setList(Array.isArray(items) ? items : []);
     } catch (e) {
       setList([]);
       setLoadError(e?.response?.data?.message || "Failed to load grievances");

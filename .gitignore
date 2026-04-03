@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# local debug artifacts (not source)
+live-headers.txt
+live-index.html
+live-main.js
