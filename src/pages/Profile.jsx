@@ -67,12 +67,15 @@ export default function Profile() {
           <div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Email</div>
 
-            <input
-              value={email}
-              disabled={!edit}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
-            />
+            {edit ? (
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border dark:border-gray-700 p-2 rounded bg-white dark:bg-gray-900 dark:text-gray-100"
+              />
+            ) : (
+              <p className="font-semibold text-gray-900 dark:text-gray-100 break-all">{email}</p>
+            )}
           </div>
 
           {/* ROLE */}

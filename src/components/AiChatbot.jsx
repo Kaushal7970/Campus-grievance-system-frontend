@@ -21,6 +21,13 @@ export default function AiChatbot() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [aiEnabled, setAiEnabled] = useState(null);
+  const [aiProvider, setAiProvider] = useState("");
+
+  const aiMissingConfigHint = (() => {
+    if (aiProvider === "gemini") return " (set GEMINI_API_KEY or GOOGLE_API_KEY in backend env).";
+    if (aiProvider === "openai") return " (set OPENAI_API_KEY in backend env).";
+    return ".";
+  })();
 
   const listRef = useRef(null);
 
@@ -29,9 +36,11 @@ export default function AiChatbot() {
       try {
         const res = await API.get("/ai/status");
         setAiEnabled(Boolean(res?.data?.enabled));
+        setAiProvider(String(res?.data?.provider || "").toLowerCase());
       } catch {
         // Status is best-effort; ignore failures.
         setAiEnabled(null);
+        setAiProvider("");
       }
     };
 
@@ -118,7 +127,7 @@ export default function AiChatbot() {
               <div className="text-sm font-semibold text-indigo-700">AI Chatbot</div>
               {aiEnabled === false && (
                 <div className="text-xs text-gray-600 mt-1">
-                  AI is not configured on the server (missing `OPENAI_API_KEY`).
+                  AI is not configured on the server{aiMissingConfigHint}
                 </div>
               )}
             </div>
