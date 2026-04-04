@@ -1,7 +1,8 @@
 import axios from "axios";
 import { safeGetItem } from "./storage";
 
-const rootUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/$/, "");
+const rootUrl = (process.env.REACT_APP_API_URL || "http://localhost:8081").replace(/\/$/, "");
+const timeoutMs = Number(process.env.REACT_APP_API_TIMEOUT_MS || 15000);
 
 function extractJwt(rawValue) {
   if (rawValue == null) return "";
@@ -35,6 +36,7 @@ function normalizeToken(rawToken) {
 
 const API = axios.create({
   baseURL: `${rootUrl}/api`,
+  timeout: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 15000,
 });
 
 API.interceptors.request.use((req) => {
