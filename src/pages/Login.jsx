@@ -39,6 +39,9 @@ export default function Login() {
         throw new Error("Token missing in login response");
       }
 
+      // Ensure subsequent requests include the token immediately.
+      API.defaults.headers.common["Authorization"] = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
       // 🔹 Save token
       try {
         localStorage.setItem("token", token);

@@ -44,11 +44,23 @@ function normalizeToken(rawToken) {
 const API = axios.create({
   baseURL: `${rootUrl}/api`,
   timeout: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 15000,
+  headers: {},
 });
+
+// Set a stable default auth header from storage for the current tab session.
+// (Interceptors still run per-request, but this prevents edge-cases where a request
+// is sent before the interceptor attaches headers.)
+{
+  const authHeader = normalizeToken(safeGetItem("token"));
+  if (authHeader) {
+    API.defaults.headers.common["Authorization"] = authHeader;
+  }
+}
 
 API.interceptors.request.use((req) => {
   const authHeader = normalizeToken(safeGetItem("token"));
   if (authHeader) {
+    API.defaults.headers.common["Authorization"] = authHeader;
     // Axios v1 may provide headers as AxiosHeaders (with .set) or a plain object.
     if (req.headers && typeof req.headers.set === "function") {
       req.headers.set("Authorization", authHeader);
