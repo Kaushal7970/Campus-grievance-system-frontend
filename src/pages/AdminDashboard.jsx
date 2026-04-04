@@ -1,5 +1,5 @@
 import Sidebar from "../components/Sidebar";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import AiChatbot from "../components/AiChatbot";
@@ -13,13 +13,11 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
   const navigate = useNavigate();
   const currentRole = String(getStoredUser()?.role || "").toUpperCase();
   const canManageUsers = ["SUPER_ADMIN", "ADMIN"].includes(currentRole);
-  const canDeleteUsers = currentRole === "SUPER_ADMIN";
-  const canViewAuditLogs = ["SUPER_ADMIN", "ADMIN"].includes(currentRole);
+  const canDeleteUsers = canManageUsers;
 
   const [list, setList] = useState([]);
   const [stats, setStats] = useState([]);
   const [users, setUsers] = useState([]);
-  const [auditLogs, setAuditLogs] = useState([]);
   const [priorityFilter, setPriorityFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
@@ -29,7 +27,7 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
 
   const COLORS = ["#facc15", "#22c55e", "#ef4444"];
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const res = await API.get("/grievance/all");
     setList(res.data);
     const counts = {};
@@ -37,23 +35,13 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
       counts[g.status] = (counts[g.status] || 0) + 1;
     });
     setStats(Object.keys(counts).map((k) => ({ name: k, value: counts[k] })));
-  };
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     if (!canManageUsers) return;
     const res = await API.get("/users");
     setUsers(res.data);
-  };
-
-  const loadAuditLogs = async () => {
-    if (!canViewAuditLogs) return;
-    try {
-      const res = await API.get("/audit-logs");
-      setAuditLogs(res.data || []);
-    } catch {
-      setAuditLogs([]);
-    }
-  };
+  }, [canManageUsers]);
 
   const resolve = async (id) => {
     const remarks = remarksMap[id] || "";
@@ -68,8 +56,13 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
   };
 
   const deleteComplaint = async (id) => {
-    await API.delete(`/grievance/delete/${id}`);
-    load();
+    try {
+      await API.delete(`/grievance/delete/${id}`);
+      load();
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Failed to delete complaint";
+      alert(msg);
+    }
   };
 
   const assign = async (id, email) => {
@@ -86,15 +79,19 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
 
   const deleteUser = async (id) => {
     if (!canDeleteUsers) return;
-    await API.delete(`/users/${id}`);
-    loadUsers();
+    try {
+      await API.delete(`/users/${id}`);
+      loadUsers();
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Failed to delete user";
+      alert(msg);
+    }
   };
 
   useEffect(() => {
     load();
     if (canManageUsers) loadUsers();
-    if (canViewAuditLogs) loadAuditLogs();
-  }, []);
+  }, [canManageUsers, load, loadUsers]);
 
   const availableCategories = useMemo(() => {
     const set = new Set();
@@ -404,7 +401,7 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
               </select>
 
               {/* 🔥 DELETE (SUPER_ADMIN ONLY) */}
-              {canDeleteUsers && u.role !== "ADMIN" && (
+              {canDeleteUsers && !["ADMIN", "SUPER_ADMIN"].includes(String(u.role || "").toUpperCase()) && u.id !== getStoredUser()?.id && (
                 <button
                   onClick={() => deleteUser(u.id)}
                   className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
@@ -415,47 +412,6 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
             </div>
           </div>
         ))}
-      </div>
-    )}
-
-
-    {/* 🧾 ACTIVITY LOGS (SUPER_ADMIN / ADMIN ONLY) */}
-    {canViewAuditLogs && (
-      <div className="bg-white p-6 rounded shadow mt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-lg">🧾 Recent Activity</h2>
-          <button
-            onClick={loadAuditLogs}
-            className="text-sm bg-white border px-3 py-2 rounded-lg hover:bg-gray-50"
-          >
-            Refresh
-          </button>
-        </div>
-
-        {auditLogs.length === 0 ? (
-          <div className="text-gray-500 italic">No logs yet.</div>
-        ) : (
-          <div className="space-y-3">
-            {auditLogs.slice(0, 20).map((a) => (
-              <div key={a.id} className="border rounded-xl p-3 bg-gray-50">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold break-words">
-                      {a.action} • {a.resourceType}#{a.resourceId}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      By: {a.actorEmail} {a.ip ? `• ${a.ip}` : ""}
-                    </div>
-                    {a.details && <div className="text-sm text-gray-700 mt-2 break-words">{a.details}</div>}
-                  </div>
-                  <div className="text-xs text-gray-500 whitespace-nowrap">
-                    {a.createdAt ? new Date(a.createdAt).toLocaleString() : ""}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     )}
       </div>

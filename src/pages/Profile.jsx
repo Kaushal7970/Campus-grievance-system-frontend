@@ -18,16 +18,21 @@ export default function Profile() {
   }
 
   const updateProfile = async () => {
-    await API.put(`/users/${storedUser.id}/update`, {
-      email
-    });
+    try {
+      await API.put(`/users/${storedUser.id}/update`, {
+        email
+      });
 
-    alert("Profile Updated ✅");
+      alert("Profile Updated ✅");
 
-    const updatedUser = { ...storedUser, email };
-    safeSetItem("user", JSON.stringify(updatedUser));
+      const updatedUser = { ...storedUser, email };
+      safeSetItem("user", JSON.stringify(updatedUser));
 
-    setEdit(false);
+      setEdit(false);
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Profile update failed";
+      alert(msg);
+    }
   };
 
   const changePassword = async () => {
@@ -36,10 +41,15 @@ export default function Profile() {
       return;
     }
 
-    await API.put(`/users/${storedUser.id}/change-password?password=${password}`);
+    try {
+      await API.put(`/users/${storedUser.id}/change-password?password=${password}`);
 
-    alert("Password Changed ✅");
-    setPassword("");
+      alert("Password Changed ✅");
+      setPassword("");
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || "Password change failed";
+      alert(msg);
+    }
   };
 
   return (
