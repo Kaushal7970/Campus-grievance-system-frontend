@@ -29,9 +29,16 @@ function extractJwt(rawValue) {
 }
 
 function normalizeToken(rawToken) {
-  const token = extractJwt(rawToken);
+  const extracted = extractJwt(rawToken);
+  if (!extracted) return "";
+
+  const token = extracted.trim();
   if (!token) return "";
-  return token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
+  // Normalize case and avoid accidental double-prefixing.
+  const bearerStripped = token.replace(/^bearer\s+/i, "").trim();
+  if (!bearerStripped) return "";
+  return `Bearer ${bearerStripped}`;
 }
 
 const API = axios.create({
@@ -45,10 +52,10 @@ API.interceptors.request.use((req) => {
     // Axios v1 may provide headers as AxiosHeaders (with .set) or a plain object.
     if (req.headers && typeof req.headers.set === "function") {
       req.headers.set("Authorization", authHeader);
+    } else {
+      const existingHeaders = req.headers && typeof req.headers === "object" ? req.headers : {};
+      req.headers = { ...existingHeaders, Authorization: authHeader };
     }
-
-    req.headers = req.headers || {};
-    req.headers["Authorization"] = authHeader;
   }
   return req;
 });
