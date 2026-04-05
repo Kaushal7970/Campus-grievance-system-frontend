@@ -29,8 +29,9 @@ export default function Login() {
 
       console.log("Login Payload:", payload);
 
-      // Render free-tier cold starts can exceed 15s; give auth a longer timeout.
-      const res = await API.post("/auth/login", payload, { timeout: 60000 });
+      // Render free-tier cold starts can exceed 60s; give auth a longer timeout.
+      const authTimeoutMs = process.env.NODE_ENV === "production" ? 120000 : 15000;
+      const res = await API.post("/auth/login", payload, { timeout: authTimeoutMs });
 
       // Debug: verify backend login payload contains token
       console.log("TOKEN:", res.data);

@@ -3,7 +3,8 @@ import { safeGetItem } from "./storage";
 
 const rootUrl = (process.env.REACT_APP_API_URL || "http://localhost:8081").replace(/\/$/, "");
 const envTimeout = Number(process.env.REACT_APP_API_TIMEOUT_MS);
-const defaultTimeoutMs = process.env.NODE_ENV === "production" ? 60000 : 15000;
+// Render free-tier cold starts can exceed 60s; keep a higher production default.
+const defaultTimeoutMs = process.env.NODE_ENV === "production" ? 120000 : 15000;
 const timeoutMs = Number.isFinite(envTimeout) && envTimeout > 0 ? envTimeout : defaultTimeoutMs;
 
 function extractJwt(rawValue) {
@@ -56,7 +57,7 @@ export async function warmUpBackend() {
   if (process.env.NODE_ENV === "test") return;
 
   try {
-    await API.get("/public/health", { timeout: Math.max(timeoutMs, 60000) });
+    await API.get("/public/health", { timeout: Math.max(timeoutMs, 120000) });
   } catch {
     // Intentionally ignore warm-up failures.
   }

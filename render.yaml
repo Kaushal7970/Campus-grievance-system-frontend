@@ -13,4 +13,4 @@ services:
         value: https://campus-grievance-system-backend.onrender.com
       # Render free-tier cold starts can exceed 15s; keep frontend HTTP timeouts higher.
       - key: REACT_APP_API_TIMEOUT_MS
-        value: 60000
+        value: 120000
