@@ -29,7 +29,8 @@ export default function Login() {
 
       console.log("Login Payload:", payload);
 
-      const res = await API.post("/auth/login", payload);
+      // Render free-tier cold starts can exceed 15s; give auth a longer timeout.
+      const res = await API.post("/auth/login", payload, { timeout: 60000 });
 
       // Debug: verify backend login payload contains token
       console.log("TOKEN:", res.data);
@@ -78,7 +79,13 @@ export default function Login() {
       if (err.response) {
         alert(err.response.data.message || "Invalid credentials");
       } else {
-        alert(err.message || "Server not responding");
+        const msg = String(err?.message || "");
+        const isTimeout = err?.code === "ECONNABORTED" || /timeout\s+of\s+\d+ms\s+exceeded/i.test(msg);
+        if (isTimeout) {
+          alert("Login is taking longer than usual (server may be starting). Please wait ~30-60 seconds and try again.");
+        } else {
+          alert(msg || "Server not responding");
+        }
       }
 
     } finally {

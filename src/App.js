@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -16,8 +17,16 @@ import GrievanceDetails from "./pages/GrievanceDetails";
 import Announcements from "./pages/Announcements";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import { warmUpBackend } from "./services/api";
 
 function App() {
+  useEffect(() => {
+    // Only needed in production where cold starts happen.
+    if (process.env.NODE_ENV === "production") {
+      warmUpBackend();
+    }
+  }, []);
+
   return (
     <HashRouter>
       <Routes>

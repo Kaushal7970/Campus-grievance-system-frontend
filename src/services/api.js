@@ -2,7 +2,9 @@ import axios from "axios";
 import { safeGetItem } from "./storage";
 
 const rootUrl = (process.env.REACT_APP_API_URL || "http://localhost:8081").replace(/\/$/, "");
-const timeoutMs = Number(process.env.REACT_APP_API_TIMEOUT_MS || 15000);
+const envTimeout = Number(process.env.REACT_APP_API_TIMEOUT_MS);
+const defaultTimeoutMs = process.env.NODE_ENV === "production" ? 60000 : 15000;
+const timeoutMs = Number.isFinite(envTimeout) && envTimeout > 0 ? envTimeout : defaultTimeoutMs;
 
 function extractJwt(rawValue) {
   if (rawValue == null) return "";
@@ -43,9 +45,22 @@ function normalizeToken(rawToken) {
 
 const API = axios.create({
   baseURL: `${rootUrl}/api`,
-  timeout: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 15000,
+  timeout: timeoutMs,
   headers: {},
 });
+
+// Best-effort warm-up for free-tier backends that may be sleeping.
+// Kept here (not in UI code) so it can be called once on app startup.
+export async function warmUpBackend() {
+  // Avoid noisy calls during unit tests.
+  if (process.env.NODE_ENV === "test") return;
+
+  try {
+    await API.get("/public/health", { timeout: Math.max(timeoutMs, 60000) });
+  } catch {
+    // Intentionally ignore warm-up failures.
+  }
+}
 
 // Set a stable default auth header from storage for the current tab session.
 // (Interceptors still run per-request, but this prevents edge-cases where a request
