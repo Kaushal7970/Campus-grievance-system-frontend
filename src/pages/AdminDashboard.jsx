@@ -331,7 +331,7 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
             <textarea
               value={aiRulesText}
               onChange={(e) => setAiRulesText(e.target.value)}
-              placeholder="Example: Always answer in Hindi. Mention escalation timeline 2/4/7/10 days. Provide helpdesk email."
+              placeholder="Example: Reply in the user's language. Mention escalation timeline 2/4/7/10 days. Provide helpdesk email."
               className="w-full min-h-[140px] border dark:border-gray-700 p-3 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-gray-100"
             />
           </div>
