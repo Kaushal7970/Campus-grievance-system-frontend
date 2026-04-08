@@ -40,6 +40,7 @@ export default function ProtectedRoute({ children, role, roles }) {
     if (userRole === "HOD") return <Navigate to="/hod" />;
     if (userRole === "COMMITTEE") return <Navigate to="/committee" />;
     if (userRole === "FACULTY") return <Navigate to="/faculty" />;
+    if (userRole === "WARDEN") return <Navigate to="/warden" />;
     return <Navigate to="/student" />;
   }
 

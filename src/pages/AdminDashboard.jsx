@@ -9,6 +9,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from "recharts";
 
+const DEPARTMENTS = ["HOSTEL", "INFRASTRUCTURE", "ELECTRICITY", "ACADEMIC", "ADMINISTRATION"];
+const CATEGORIES = ["HOSTEL", "INFRASTRUCTURE", "ELECTRICITY", "ACADEMIC", "FACULTY_BEHAVIOR", "ADMINISTRATION"];
+const STAFF_ROLES = ["", "FACULTY", "WARDEN", "HOD", "PRINCIPAL", "ADMIN", "SUPER_ADMIN", "COMMITTEE"];
+const COLORS = ["#facc15", "#22c55e", "#ef4444"];
+
 export default function AdminDashboard({ dashboardTitle = "Admin" }) {
   const navigate = useNavigate();
   const currentRole = String(getStoredUser()?.role || "").toUpperCase();
@@ -31,17 +36,22 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
   const [aiRulesError, setAiRulesError] = useState("");
   const [aiRulesSavedAt, setAiRulesSavedAt] = useState("");
 
-  const COLORS = ["#facc15", "#22c55e", "#ef4444"];
+  const [routing, setRouting] = useState({});
+  const [routingLoading, setRoutingLoading] = useState(false);
+  const [routingError, setRoutingError] = useState("");
 
   const load = useCallback(async () => {
-    const res = await API.get("/grievance/all");
+    const isAdmin = ["SUPER_ADMIN", "ADMIN"].includes(currentRole);
+    const res = isAdmin
+      ? await API.get("/grievance/all")
+      : await API.get("/grievance/department/mine");
     setList(res.data);
     const counts = {};
     res.data.forEach((g) => {
       counts[g.status] = (counts[g.status] || 0) + 1;
     });
     setStats(Object.keys(counts).map((k) => ({ name: k, value: counts[k] })));
-  }, []);
+  }, [currentRole]);
 
   const loadUsers = useCallback(async () => {
     if (!canManageUsers) return;
@@ -63,6 +73,54 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
       setAiRulesLoading(false);
     }
   }, [canManageUsers]);
+
+  const loadRouting = useCallback(async () => {
+    if (!canManageUsers) return;
+    try {
+      setRoutingLoading(true);
+      setRoutingError("");
+      const res = await API.get("/admin/routing/category-mappings");
+      const map = {};
+      (res.data || []).forEach((m) => {
+        const key = String(m?.category || "").toUpperCase();
+        if (!key) return;
+        map[key] = {
+          department: String(m?.department || "").toUpperCase(),
+          targetRole: String(m?.targetRole || "").toUpperCase()
+        };
+      });
+
+      CATEGORIES.forEach((c) => {
+        if (!map[c]) map[c] = { department: "", targetRole: "" };
+      });
+
+      setRouting(map);
+    } catch (e) {
+      setRoutingError(e?.response?.data?.message || e?.message || "Failed to load routing mappings");
+    } finally {
+      setRoutingLoading(false);
+    }
+  }, [canManageUsers]);
+
+  const saveRouting = async (category) => {
+    if (!canManageUsers) return;
+
+    const c = String(category || "").toUpperCase();
+    const row = routing?.[c] || {};
+    const department = String(row?.department || "").toUpperCase();
+    const targetRole = String(row?.targetRole || "").toUpperCase();
+
+    if (!department) {
+      alert("Select a department first");
+      return;
+    }
+
+    await API.put(`/admin/routing/category-mappings/${encodeURIComponent(c)}`, {
+      department,
+      targetRole: targetRole || null
+    });
+    loadRouting();
+  };
 
   const saveAiRules = async () => {
     if (!canManageUsers) return;
@@ -114,6 +172,18 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
     loadUsers();
   };
 
+  const changeDepartment = async (id, department) => {
+    if (!canManageUsers) return;
+    await API.put(`/users/${id}/department?department=${encodeURIComponent(department)}`);
+    loadUsers();
+  };
+
+  const changePhoneNumber = async (id, phoneNumber) => {
+    if (!canManageUsers) return;
+    await API.put(`/users/${id}/update`, { phoneNumber });
+    loadUsers();
+  };
+
   const deleteUser = async (id) => {
     if (!canDeleteUsers) return;
     try {
@@ -130,8 +200,9 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
     if (canManageUsers) {
       loadUsers();
       loadAiRules();
+      loadRouting();
     }
-  }, [canManageUsers, load, loadUsers, loadAiRules]);
+  }, [canManageUsers, load, loadUsers, loadAiRules, loadRouting]);
 
   const availableCategories = useMemo(() => {
     const set = new Set();
@@ -289,7 +360,7 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white dark:bg-gray-800 p-5 rounded shadow border border-gray-100 dark:border-gray-700"><ResponsiveContainer width="100%" height={220}><PieChart><Pie data={stats} dataKey="value" outerRadius={80}>{stats.map((e, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}</Pie><Tooltip /><Legend /></PieChart></ResponsiveContainer></div>
-          <div className="bg-white dark:bg-gray-800 p-5 rounded shadow border border-gray-100 dark:border-gray-700"><ResponsiveContainer width="100%" height={220}><BarChart data={stats}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Bar dataKey="value" fill="#6366f1" /></BarChart></ResponsiveContainer></div>
+          <div className="bg-white dark:bg-gray-800 p-5 rounded shadow border border-gray-100 dark:border-gray-700"><ResponsiveContainer width="100%" height={220}><BarChart data={stats}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Bar dataKey="value" fill={`rgb(var(--app-accent))`} /></BarChart></ResponsiveContainer></div>
         </div>
 
         {canManageUsers && (
@@ -315,7 +386,7 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
                   type="button"
                   onClick={saveAiRules}
                   disabled={aiRulesSaving}
-                  className="text-xs bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-60"
+                  className="text-xs bg-[rgb(var(--app-accent))] text-white px-3 py-2 rounded-lg hover:bg-[rgb(var(--app-accent-hover))] disabled:opacity-60"
                 >
                   {aiRulesSaving ? "Saving…" : "Save"}
                 </button>
@@ -427,7 +498,8 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
                 <div className="flex gap-2 mt-2">
                   <span className={`text-xs px-2 py-1 rounded ${g.status === "RESOLVED" ? "bg-green-100 text-green-700" : g.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" : "bg-yellow-100 text-yellow-700"}`}>{g.status}</span>
                   <span className={`text-xs px-2 py-1 rounded ${g.priority === "HIGH" ? "bg-red-100 text-red-700" : g.priority === "MEDIUM" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}>{g.priority}</span>
-                  {g.assignedTo && <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">👨‍🏫 {g.assignedTo}</span>}
+                  {g.department && <span className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">🏷 {String(g.department).toUpperCase()}</span>}
+                  {g.assignedTo && <span className="text-xs bg-[rgb(var(--app-accent)/0.10)] text-[rgb(var(--app-accent))] px-2 py-1 rounded">👨‍🏫 {g.assignedTo}</span>}
                 </div>
                 {g.remarks && <p className="text-sm text-gray-600 mt-2 italic">💬 {g.remarks}</p>}
               </div>
@@ -441,8 +513,10 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
                 </button>
                 <textarea placeholder="Remarks..." value={remarksMap[g.id] || ""} onChange={(e) => setRemarksMap({...remarksMap, [g.id]: e.target.value})} className="border dark:border-gray-700 p-2 rounded-lg text-xs bg-white dark:bg-gray-800 dark:text-gray-100" />
                 <select value={g.assignedTo || ""} onChange={(e) => assign(g.id, e.target.value)} className="border dark:border-gray-700 px-2 py-1 rounded-lg text-xs bg-white dark:bg-gray-800 dark:text-gray-100">
-                  <option value="">Assign Faculty</option>
-                  {users.filter(u => u.role === "FACULTY").map(f => (<option key={f.id} value={f.email}>{f.email}</option>))}
+                  <option value="">Assign Staff</option>
+                  {users
+                    .filter((u) => ["FACULTY", "WARDEN"].includes(String(u?.role || "").toUpperCase()))
+                    .map((u) => (<option key={u.id} value={u.email}>{u.email}</option>))}
                 </select>
                 <div className="flex gap-1">
                   {g.status === "PENDING" && <button onClick={() => startWork(g.id)} className="flex-1 bg-blue-500 text-white py-1 rounded text-xs hover:bg-blue-600">Start</button>}
@@ -459,6 +533,73 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
       <div className="bg-white p-6 rounded shadow">
         <h2 className="font-semibold mb-4 text-lg">👥 User Management</h2>
 
+        <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-semibold">🏷 Department Routing</h3>
+            <button
+              type="button"
+              onClick={loadRouting}
+              disabled={routingLoading}
+              className="text-xs bg-white border px-3 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-60"
+            >
+              {routingLoading ? "Loading…" : "Reload"}
+            </button>
+          </div>
+
+          {routingError && (
+            <div className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 p-3 rounded-xl">
+              {routingError}
+            </div>
+          )}
+
+          <div className="mt-4 grid gap-2">
+            {CATEGORIES.map((c) => (
+              <div key={c} className="flex flex-col md:flex-row md:items-center gap-2 p-3 border rounded bg-white">
+                <div className="font-medium md:w-[220px]">{c}</div>
+
+                <select
+                  value={routing?.[c]?.department || ""}
+                  onChange={(e) => setRouting((prev) => ({
+                    ...(prev || {}),
+                    [c]: { ...(prev?.[c] || {}), department: e.target.value }
+                  }))}
+                  className="border px-2 py-2 rounded text-sm md:flex-1"
+                >
+                  <option value="">Select department…</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={routing?.[c]?.targetRole || ""}
+                  onChange={(e) => setRouting((prev) => ({
+                    ...(prev || {}),
+                    [c]: { ...(prev?.[c] || {}), targetRole: e.target.value }
+                  }))}
+                  className="border px-2 py-2 rounded text-sm md:w-[220px]"
+                >
+                  {STAFF_ROLES.map((r) => (
+                    <option key={r || "(any)"} value={r}>{r ? r : "Any staff role"}</option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => saveRouting(c)}
+                  className="bg-[rgb(var(--app-accent))] hover:bg-[rgb(var(--app-accent-hover))] text-white px-3 py-2 rounded text-sm"
+                >
+                  Save
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 text-xs text-gray-600">
+            Routing assigns a new complaint to the least-busy user in the mapped department.
+          </div>
+        </div>
+
         {users.map((u) => (
           <div
             key={u.id}
@@ -466,10 +607,36 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
           >
             <div>
               <p className="font-medium">{u.email}</p>
-              <p className="text-xs text-gray-500">{u.role}</p>
+              <p className="text-xs text-gray-500">{u.role}{u.department ? ` • ${String(u.department).toUpperCase()}` : ""}</p>
             </div>
 
             <div className="flex gap-2 items-center">
+              {/* 📱 PHONE */}
+              <input
+                type="tel"
+                defaultValue={u.phoneNumber || ""}
+                placeholder="+91XXXXXXXXXX"
+                className="border px-2 py-1 rounded text-sm w-[160px]"
+                onBlur={(e) => {
+                  const next = e.target.value;
+                  if (String(next || "") !== String(u.phoneNumber || "")) {
+                    changePhoneNumber(u.id, next);
+                  }
+                }}
+              />
+
+              {/* 🔥 DEPARTMENT CHANGE */}
+              <select
+                value={String(u.department || "")}
+                onChange={(e) => changeDepartment(u.id, e.target.value)}
+                className="border px-2 py-1 rounded text-sm"
+              >
+                <option value="">(no dept)</option>
+                {DEPARTMENTS.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+
               {/* 🔥 ROLE CHANGE */}
               <select
                 value={u.role}
@@ -482,6 +649,7 @@ export default function AdminDashboard({ dashboardTitle = "Admin" }) {
                 <option value="HOD">HOD</option>
                 <option value="COMMITTEE">COMMITTEE</option>
                 <option value="FACULTY">FACULTY</option>
+                <option value="WARDEN">WARDEN</option>
                 <option value="STUDENT">STUDENT</option>
               </select>
 

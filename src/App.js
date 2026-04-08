@@ -10,6 +10,7 @@ import PrincipalDashboard from "./pages/PrincipalDashboard";
 import HodDashboard from "./pages/HodDashboard";
 import CommitteeDashboard from "./pages/CommitteeDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
+import WardenDashboard from "./pages/WardenDashboard";
 import Profile from "./pages/Profile";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -105,6 +106,16 @@ function App() {
           element={
             <ProtectedRoute role="FACULTY">
               <FacultyDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* WARDEN */}
+        <Route
+          path="/warden"
+          element={
+            <ProtectedRoute role="WARDEN">
+              <WardenDashboard />
             </ProtectedRoute>
           }
         />

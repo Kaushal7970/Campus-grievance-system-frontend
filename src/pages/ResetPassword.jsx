@@ -38,7 +38,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-[rgb(var(--app-accent))] to-[rgb(var(--app-accent-2))]">
       <div className="bg-white p-8 rounded-3xl shadow-2xl w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
 
@@ -46,14 +46,14 @@ export default function ResetPassword() {
           type="email"
           placeholder="Email"
           value={email}
-          className="w-full p-3 mb-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-3 mb-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           placeholder="OTP"
           value={otp}
-          className="w-full p-3 mb-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-3 mb-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
           onChange={(e) => setOtp(e.target.value)}
         />
 
@@ -61,7 +61,7 @@ export default function ResetPassword() {
           type="password"
           placeholder="New Password"
           value={newPassword}
-          className="w-full p-3 mb-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-3 mb-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
           onChange={(e) => setNewPassword(e.target.value)}
         />
 

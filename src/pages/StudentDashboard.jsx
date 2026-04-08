@@ -59,7 +59,7 @@ export default function StudentDashboard() {
       setAiSuggestion(res.data);
 
       const suggestedCategory = String(res.data?.category || "").toUpperCase();
-      if (["ACADEMIC", "HOSTEL", "INFRASTRUCTURE", "FACULTY_BEHAVIOR", "ADMINISTRATION"].includes(suggestedCategory)) {
+      if (["ACADEMIC", "HOSTEL", "INFRASTRUCTURE", "ELECTRICITY", "FACULTY_BEHAVIOR", "ADMINISTRATION"].includes(suggestedCategory)) {
         setCategory(suggestedCategory);
       }
 
@@ -166,16 +166,16 @@ export default function StudentDashboard() {
         )}
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 max-w-2xl border border-gray-100 dark:border-gray-700">
-          <h2 className="text-lg font-semibold mb-4 text-indigo-700">Submit Complaint</h2>
+          <h2 className="text-lg font-semibold mb-4 text-[rgb(var(--app-accent))]">Submit Complaint</h2>
 
           <input
-            className="w-full border dark:border-gray-700 p-3 mb-3 rounded-lg bg-white dark:bg-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border dark:border-gray-700 p-3 mb-3 rounded-lg bg-white dark:bg-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
             placeholder="Issue Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
-            className="w-full border dark:border-gray-700 p-3 mb-3 rounded-lg h-32 bg-white dark:bg-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full border dark:border-gray-700 p-3 mb-3 rounded-lg h-32 bg-white dark:bg-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
             placeholder="Detailed Description..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -185,14 +185,14 @@ export default function StudentDashboard() {
             type="button"
             onClick={analyzeWithAi}
             disabled={aiLoading}
-            className="w-full mb-3 bg-white border border-indigo-200 text-indigo-700 font-semibold py-3 rounded-lg hover:bg-indigo-50 transition-all disabled:opacity-60"
+            className="w-full mb-3 bg-white border border-[rgb(var(--app-accent)/0.25)] text-[rgb(var(--app-accent))] font-semibold py-3 rounded-lg hover:bg-[rgb(var(--app-accent)/0.06)] transition-all disabled:opacity-60"
           >
             {aiLoading ? "Analyzing…" : "Analyze with AI"}
           </button>
 
           {aiSuggestion && (
-            <div className="mb-4 p-4 rounded-xl border dark:border-gray-700 bg-indigo-50/50 dark:bg-gray-900">
-              <div className="text-sm font-semibold text-indigo-800">AI Suggestion</div>
+            <div className="mb-4 p-4 rounded-xl border dark:border-gray-700 bg-[rgb(var(--app-accent)/0.06)] dark:bg-gray-900">
+              <div className="text-sm font-semibold text-[rgb(var(--app-accent))]">AI Suggestion</div>
               <div className="text-sm text-gray-800 dark:text-gray-100 mt-1">{aiSuggestion.response}</div>
               <div className="text-xs text-gray-700 dark:text-gray-300 mt-2">
                 Category: <span className="font-semibold">{aiSuggestion.category}</span> • Priority:{" "}
@@ -225,6 +225,7 @@ export default function StudentDashboard() {
               <option value="ACADEMIC">ACADEMIC</option>
               <option value="HOSTEL">HOSTEL</option>
               <option value="INFRASTRUCTURE">INFRASTRUCTURE</option>
+              <option value="ELECTRICITY">ELECTRICITY</option>
               <option value="FACULTY_BEHAVIOR">FACULTY_BEHAVIOR</option>
               <option value="ADMINISTRATION">ADMINISTRATION</option>
             </select>
@@ -266,7 +267,7 @@ export default function StudentDashboard() {
           <button
             onClick={submit}
             disabled={submitting}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-xl transition-all disabled:opacity-60"
+            className="w-full bg-gradient-to-r from-[rgb(var(--app-accent))] to-[rgb(var(--app-accent-2))] text-white font-bold py-3 rounded-lg hover:shadow-xl transition-all disabled:opacity-60"
           >
             {submitting ? "Submitting…" : "Submit Now"}
           </button>
@@ -292,7 +293,7 @@ export default function StudentDashboard() {
                       <span className={`text-xs px-2 py-1 rounded font-bold ${g.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : g.status === "RESOLVED" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
                         {g.status}
                       </span>
-                      {g.category && <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-bold">{g.category}</span>}
+                      {g.category && <span className="text-xs bg-[rgb(var(--app-accent)/0.10)] text-[rgb(var(--app-accent))] px-2 py-1 rounded font-bold">{g.category}</span>}
                       {g.anonymous && <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold">🔒 Anonymous</span>}
                     </div>
                   </div>
@@ -300,7 +301,7 @@ export default function StudentDashboard() {
                   <div className="flex flex-col gap-2 items-end">
                     <button
                       onClick={() => navigate(`/grievance/${g.id}`)}
-                      className="text-indigo-700 bg-white dark:bg-gray-800 border dark:border-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="text-[rgb(var(--app-accent))] bg-white dark:bg-gray-800 border dark:border-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-[rgb(var(--app-accent)/0.06)] dark:hover:bg-gray-700"
                     >
                       View
                     </button>

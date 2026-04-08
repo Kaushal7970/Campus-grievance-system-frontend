@@ -140,7 +140,7 @@ export default function Announcements() {
 
             <button
               onClick={create}
-              className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700"
+              className="mt-4 bg-[rgb(var(--app-accent))] text-white px-4 py-2 rounded-xl hover:bg-[rgb(var(--app-accent-hover))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
             >
               Publish
             </button>

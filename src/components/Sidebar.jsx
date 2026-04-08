@@ -23,6 +23,7 @@ export default function Sidebar() {
     HOD: { path: "/hod", label: "HOD Dashboard", icon: "📊" },
     COMMITTEE: { path: "/committee", label: "Committee Dashboard", icon: "📊" },
     FACULTY: { path: "/faculty", label: "Faculty Dashboard", icon: "👨‍🏫" },
+    WARDEN: { path: "/warden", label: "Warden Dashboard", icon: "🏨" },
     STUDENT: { path: "/student", label: "Student Dashboard", icon: "🎓" }
   };
 
@@ -36,7 +37,7 @@ export default function Sidebar() {
       onClick={() => navigate(path)}
       className={`w-full text-left p-3 rounded-xl transition flex items-center gap-2 ${
         location.pathname === path
-          ? "bg-white text-indigo-700 font-semibold"
+          ? "bg-white text-[rgb(var(--app-accent))] font-semibold"
           : "hover:bg-white/20"
       }`}
     >
@@ -46,7 +47,7 @@ export default function Sidebar() {
   );
 
   return (
-    <div className="h-screen w-64 bg-gradient-to-b from-indigo-600 to-purple-700 text-white flex flex-col justify-between p-6">
+    <div className="h-screen w-64 bg-gradient-to-b from-[rgb(var(--app-accent))] to-[rgb(var(--app-accent-2))] text-white flex flex-col justify-between p-6">
 
       {/* TOP */}
       <div>

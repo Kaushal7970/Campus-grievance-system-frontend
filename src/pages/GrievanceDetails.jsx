@@ -263,7 +263,7 @@ export default function GrievanceDetails() {
                   {String(grievance.status || "").toUpperCase()}
                 </span>
                 {grievance.category && (
-                  <span className="text-xs px-2 py-1 rounded font-bold bg-indigo-50 text-indigo-700">
+                  <span className="text-xs px-2 py-1 rounded font-bold bg-[rgb(var(--app-accent)/0.12)] text-[rgb(var(--app-accent))] dark:bg-[rgb(var(--app-accent)/0.18)]">
                     {String(grievance.category).toUpperCase()}
                   </span>
                 )}
@@ -309,7 +309,7 @@ export default function GrievanceDetails() {
 
                 <button
                   onClick={updateStatus}
-                  className="w-full mt-3 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+                  className="w-full mt-3 bg-[rgb(var(--app-accent))] text-white py-2 rounded-lg hover:bg-[rgb(var(--app-accent-hover))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
                 >
                   Save
                 </button>
@@ -413,7 +413,7 @@ export default function GrievanceDetails() {
                 return (
                   <div
                     key={m.id || `${m.createdAt}-${m.senderEmail}`}
-                    className={`border dark:border-gray-700 rounded-2xl p-3 ${mine ? "bg-indigo-50 dark:bg-indigo-950" : "bg-gray-50 dark:bg-gray-900"}`}
+                    className={`border dark:border-gray-700 rounded-2xl p-3 ${mine ? "bg-[rgb(var(--app-accent)/0.10)] dark:bg-[rgb(var(--app-accent)/0.18)]" : "bg-gray-50 dark:bg-gray-900"}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
@@ -443,7 +443,7 @@ export default function GrievanceDetails() {
             />
             <button
               onClick={sendChat}
-              className="mt-3 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+              className="mt-3 bg-[rgb(var(--app-accent))] text-white px-4 py-2 rounded-lg hover:bg-[rgb(var(--app-accent-hover))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
             >
               Send
             </button>
@@ -465,7 +465,7 @@ export default function GrievanceDetails() {
                   </div>
                   <div className="text-gray-800 dark:text-gray-200 mt-2 whitespace-pre-wrap">{c.message}</div>
                   {c.internalOnly && (
-                    <div className="text-xs mt-2 text-indigo-700 font-semibold">Internal</div>
+                    <div className="text-xs mt-2 text-[rgb(var(--app-accent))] font-semibold">Internal</div>
                   )}
                 </div>
               ))
@@ -495,7 +495,7 @@ export default function GrievanceDetails() {
 
             <button
               onClick={addComment}
-              className="mt-3 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+              className="mt-3 bg-[rgb(var(--app-accent))] text-white px-4 py-2 rounded-lg hover:bg-[rgb(var(--app-accent-hover))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
             >
               Post
             </button>
@@ -514,7 +514,7 @@ export default function GrievanceDetails() {
           <div>
             <button
               onClick={() => navigate(-1)}
-              className="text-sm text-indigo-700 hover:underline"
+              className="text-sm text-[rgb(var(--app-accent))] hover:underline"
             >
               ← Back
             </button>

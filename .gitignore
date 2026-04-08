@@ -26,3 +26,7 @@ yarn-error.log*
 live-headers.txt
 live-index.html
 live-main.js
+
+# local build logs/markers (not source)
+build-log.txt
+build_success.txt

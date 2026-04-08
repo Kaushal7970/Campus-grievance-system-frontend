@@ -6,7 +6,8 @@ export default function Register() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
+    phoneNumber: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -16,8 +17,9 @@ export default function Register() {
     const name = form.name.trim();
     const email = form.email.trim().toLowerCase();
     const password = form.password;
+    const phoneNumber = form.phoneNumber.trim();
 
-    if (!name || !email || !password) {
+    if (!name || !email || !phoneNumber || !password) {
       alert("Please fill all fields");
       return;
     }
@@ -35,6 +37,7 @@ export default function Register() {
         name,
         email,
         password,
+        phoneNumber,
         role: "STUDENT"
       });
 
@@ -56,7 +59,7 @@ export default function Register() {
   };
 
   return (
-    <div className="h-screen flex justify-center items-center bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-gray-950 dark:to-gray-900">
+    <div className="h-screen flex justify-center items-center bg-gradient-to-r from-[rgb(var(--app-accent))] to-[rgb(var(--app-accent-2))] dark:from-gray-950 dark:to-gray-900">
 
       <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl w-96 border border-gray-100 dark:border-gray-700">
 
@@ -66,28 +69,35 @@ export default function Register() {
 
         <input
           placeholder="Full Name"
-          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+
+        <input
+          type="tel"
+          placeholder="Phone (e.g. +91XXXXXXXXXX)"
+          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
+          onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
         />
 
         <input
           type="password"
           placeholder="Password"
-          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-3 mb-4 border rounded-xl bg-white dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
 
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full bg-indigo-600 text-white p-3 rounded-xl hover:bg-indigo-700 transition"
+          className="w-full bg-[rgb(var(--app-accent))] text-white p-3 rounded-xl hover:bg-[rgb(var(--app-accent-hover))] transition"
         >
           {loading ? "Registering..." : "Register"}
         </button>
@@ -96,7 +106,7 @@ export default function Register() {
           Already have an account?{" "}
           <span
             onClick={() => navigate("/")}
-            className="text-indigo-600 cursor-pointer font-semibold"
+            className="text-[rgb(var(--app-accent))] cursor-pointer font-semibold"
           >
             Login
           </span>

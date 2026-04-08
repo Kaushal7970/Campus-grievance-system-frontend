@@ -97,7 +97,7 @@ export default function AiChatbot() {
         type="button"
         aria-label={open ? "Close AI chatbot" : "Open AI chatbot"}
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700"
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-[rgb(var(--app-accent))] text-white shadow-lg flex items-center justify-center hover:bg-[rgb(var(--app-accent-hover))]"
       >
         <svg
           viewBox="0 0 24 24"
@@ -124,7 +124,7 @@ export default function AiChatbot() {
         <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-xl border">
           <div className="p-4 border-b flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="text-sm font-semibold text-indigo-700">AI Chatbot</div>
+              <div className="text-sm font-semibold text-[rgb(var(--app-accent))]">AI Chatbot</div>
               {aiEnabled === false && (
                 <div className="text-xs text-gray-600 mt-1">
                   AI is not configured on the server{aiMissingConfigHint}
@@ -160,7 +160,7 @@ export default function AiChatbot() {
                   <div
                     className={
                       m.role === "user"
-                        ? "max-w-[85%] bg-indigo-600 text-white px-3 py-2 rounded-xl text-sm"
+                        ? "max-w-[85%] bg-[rgb(var(--app-accent))] text-white px-3 py-2 rounded-xl text-sm"
                         : "max-w-[85%] bg-white border px-3 py-2 rounded-xl text-sm text-gray-800"
                     }
                   >
@@ -188,14 +188,14 @@ export default function AiChatbot() {
                 }
               }}
               placeholder="Type a message…"
-              className="flex-1 border p-3 rounded-lg outline-none focus:ring-2 focus:ring-indigo-400"
+              className="flex-1 border p-3 rounded-lg outline-none focus:ring-2 focus:ring-[rgb(var(--app-accent)/0.45)]"
               disabled={sending}
             />
             <button
               type="button"
               onClick={send}
               disabled={sending || !input.trim()}
-              className="bg-indigo-600 text-white px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-60"
+              className="bg-[rgb(var(--app-accent))] text-white px-4 rounded-lg hover:bg-[rgb(var(--app-accent-hover))] disabled:opacity-60"
             >
               {sending ? "Sending…" : "Send"}
             </button>

@@ -92,7 +92,7 @@ export default function NotificationBell() {
               onClick={() => {
                 load();
               }}
-              className="text-xs text-indigo-700 hover:underline"
+              className="text-xs text-[rgb(var(--app-accent))] hover:underline"
             >
               Refresh
             </button>
@@ -125,7 +125,7 @@ export default function NotificationBell() {
                       )}
                     </div>
                     {!n.readAt && (
-                      <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full font-bold">
+                      <span className="text-[10px] bg-[rgb(var(--app-accent)/0.10)] text-[rgb(var(--app-accent))] px-2 py-1 rounded-full font-bold">
                         UNREAD
                       </span>
                     )}
